@@ -18,7 +18,7 @@ documentation https://docs.github.com/en/pages.
 ## GitHub CI
 
 This project's static Pages are built by [GitHub CI][ci], following the steps
-defined in [`.github-ci.yml`](.github-ci.yml)
+defined in [`.github/workflows/nuxtjs.yml`](.github/workflows/nuxtjs.yml)
 
 ## Building locally
 
