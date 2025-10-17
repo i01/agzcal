@@ -43,7 +43,7 @@ If you forked this project for your own use, please go to your project's
 **Settings** and remove the forking relationship, which won't be necessary
 unless you want to contribute back to the upstream project.
 
-[ci]: https://about.gitlab.com/gitlab-ci/
+[ci]: https://docs.github.com/en/actions/get-started/continuous-integration
 [Nuxt]: https://nuxtjs.org/
 [install]: https://nuxtjs.org/guide/installation/
 [documentation]: https://nuxtjs.org/guide
