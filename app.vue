@@ -1,8 +1,3 @@
-<!--<template>
-  <div class='app'>
-    <FullCalendar :options='calendarOptions' />
-  </div>
-</template>-->
 <template>
   <div class='app'>
     <div class='app-sidebar'>
@@ -46,13 +41,37 @@
 </template>
 
 <script lang="ts">
-//import { defineComponent } from 'vue'
 import FullCalendar from '@fullcalendar/vue3'
 import interactionPlugin from '@fullcalendar/interaction'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { INITIAL_EVENTS, createEventId } from './event-utils'
-import type { CalendarOptions, DateSelectArg, EventApi, EventClickArg } from '@fullcalendar/core/index.js'
+import type { CalendarOptions, DateSelectArg, EventApi, EventClickArg, EventInput } from '@fullcalendar/core/index.js'
+import type { ez } from '@fullcalendar/core/internal-common'
+
+async function handleFormGet(){
+  return await $fetch('/api/entries') 
+}
+
+async function handleFormInsert(event: { id: string; title: string; start: string; end: string; allDay: boolean }) {
+  const res = await $fetch('/api/entries', {
+    method: 'POST',
+    body: event
+  })
+}
+
+async function handleFormUpdate(event: ez) {
+  const res = await $fetch(`/api/entries/${event.id}`, {
+    method: 'PATCH',
+    body: event
+  })
+}
+
+async function handleFormDelete(event: ez){
+  const res = await $fetch(`/api/entries/${event.id}`, {
+    method: 'DELETE'
+  }) 
+}
 
 export default {
   components: {
@@ -82,10 +101,9 @@ export default {
         eventChange:
         eventRemove:
         */
-        //initialEvents: [
-        //  { title: 'nice event', start: new Date() }
-        //]
-        initialEvents: INITIAL_EVENTS, // alternatively, use the `events` setting to fetch from a feed
+        eventChange: this.handleEventChange,
+        //initialEvents: INITIAL_EVENTS, // alternatively, use the `events` setting to fetch from a feed
+        events: this.loadEvents
       } as CalendarOptions,
       currentEvents: [] as EventApi[],
     }
@@ -101,23 +119,32 @@ export default {
       calendarApi.unselect() // clear date selection
 
       if (title) {
-        calendarApi.addEvent({
+        let entry = {
           id: createEventId(),
           title,
           start: selectInfo.startStr,
           end: selectInfo.endStr,
           allDay: selectInfo.allDay
-        })
+        }
+        calendarApi.addEvent(entry)
+        handleFormInsert(entry)
       }
     },
     handleEventClick(clickInfo: EventClickArg) {
       if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'?`)) {
         clickInfo.event.remove()
+        handleFormDelete(clickInfo.event)
       }
     },
     handleEvents(events: EventApi[]) {
       this.currentEvents = events
     },
+    handleEventChange(clickInfo: EventClickArg) {
+      handleFormUpdate(clickInfo.event)
+    },
+    async loadEvents(): Promise<EventInput[]> {
+      return (await handleFormGet()) as EventInput[]
+    }
   }
 }
 </script>
