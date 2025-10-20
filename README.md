@@ -25,7 +25,7 @@ defined in [`.github/workflows/nuxtjs.yml`](.github/workflows/nuxtjs.yml)
 To work locally with this project, you'll have to follow the steps below:
 
 1. Fork, clone or download this project, e.g.: `git clone https://github.com/i01/agzcal.git`
-2. Change to project direcotory: `cd agzcal`
+2. Change to project directory: `cd agzcal`
 1. Install dependencies: `npm install`
 1. Generate database migrations: `npm run db:generate`
 1. Push the schema to the database: `npm run db:push`
