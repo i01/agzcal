@@ -8,8 +8,8 @@ export const tables = schema
 
 export function useDrizzle() {
   //return drizzle(process.env.DATABASE_URL)
-  const sqlite = new Database('local.db');
-  return drizzle({ client: sqlite });
+  const sqlite = new Database('local.db')
+  return drizzle({ client: sqlite })
 }
 
 export type Entry = typeof schema.entries.$inferSelect

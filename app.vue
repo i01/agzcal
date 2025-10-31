@@ -40,16 +40,17 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import FullCalendar from '@fullcalendar/vue3'
 import interactionPlugin from '@fullcalendar/interaction'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
 import { INITIAL_EVENTS, createEventId } from './event-utils'
-import type { CalendarOptions, DateSelectArg, EventApi, EventClickArg, EventInput } from '@fullcalendar/core/index.js'
+import type { CalendarOptions, DateSelectArg, EventApi, EventChangeArg, EventClickArg, EventInput } from '@fullcalendar/core/index.js'
 import type { ez } from '@fullcalendar/core/internal-common'
+import { ref } from 'vue'
 
-async function handleFormGet(){
+async function handleFormGet(): Promise<EventInput[]>{
   return await $fetch('/api/entries') 
 }
 
@@ -70,82 +71,69 @@ async function handleFormUpdate(event: ez) {
 async function handleFormDelete(event: ez){
   const res = await $fetch(`/api/entries/${event.id}`, {
     method: 'DELETE'
-  }) 
+  })
 }
 
-export default {
-  components: {
-    FullCalendar
+const calendarOptions = ref<CalendarOptions>({
+  plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin],
+  headerToolbar: {
+    left: 'prev,next today',
+    center: 'title',
+    right: 'dayGridMonth,timeGridWeek,timeGridDay'
   },
-  data() {
-    return {
-      calendarOptions: {
-        plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin],
-        headerToolbar: {
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        },
-        initialView: 'timeGridWeek',
-        nowIndicator: true,
-        editable: true,
-        selectable: true,
-        selectMirror: true,
-        dayMaxEvents: true,
-        weekends: true,
-        select: this.handleDateSelect,
-        eventClick: this.handleEventClick,
-        eventsSet: this.handleEvents,
-        /* you can update a remote database when these fire:
-        eventAdd:
-        eventChange:
-        eventRemove:
-        */
-        eventChange: this.handleEventChange,
-        //initialEvents: INITIAL_EVENTS, // alternatively, use the `events` setting to fetch from a feed
-        events: this.loadEvents
-      } as CalendarOptions,
-      currentEvents: [] as EventApi[],
+  initialView: 'timeGridWeek',
+  nowIndicator: true,
+  editable: true,
+  selectable: true,
+  selectMirror: true,
+  dayMaxEvents: true,
+  weekends: true,
+  select: (selectInfo: DateSelectArg) => {
+    let title = prompt('Please enter a new title for your event')
+    let calendarApi = selectInfo.view.calendar
+    
+    calendarApi.unselect() // clear date selection
+    
+    if (title) {
+      let entry = {
+        id: createEventId(),
+        title,
+        start: selectInfo.startStr,
+        end: selectInfo.endStr,
+        allDay: selectInfo.allDay
+      }
+      calendarApi.addEvent(entry)
+      handleFormInsert(entry)
     }
   },
-  methods: {
-    handleWeekendsToggle() {
-      this.calendarOptions.weekends = !this.calendarOptions.weekends // update a property
-    },
-    handleDateSelect(selectInfo: DateSelectArg) {
-      let title = prompt('Please enter a new title for your event')
-      let calendarApi = selectInfo.view.calendar
-
-      calendarApi.unselect() // clear date selection
-
-      if (title) {
-        let entry = {
-          id: createEventId(),
-          title,
-          start: selectInfo.startStr,
-          end: selectInfo.endStr,
-          allDay: selectInfo.allDay
-        }
-        calendarApi.addEvent(entry)
-        handleFormInsert(entry)
-      }
-    },
-    handleEventClick(clickInfo: EventClickArg) {
-      if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'?`)) {
-        clickInfo.event.remove()
-        handleFormDelete(clickInfo.event)
-      }
-    },
-    handleEvents(events: EventApi[]) {
-      this.currentEvents = events
-    },
-    handleEventChange(clickInfo: EventClickArg) {
-      handleFormUpdate(clickInfo.event)
-    },
-    async loadEvents(): Promise<EventInput[]> {
-      return (await handleFormGet()) as EventInput[]
+  eventClick: (clickInfo: EventClickArg) => {
+    if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'?`)) {
+      clickInfo.event.remove()
+      handleFormDelete(clickInfo.event)
     }
+  },
+  eventsSet: (events: EventApi[]) => {
+    currentEvents.value = events
+  },
+  /* you can update a remote database when these fire:
+  eventAdd:
+  eventChange:
+  eventRemove:
+  */
+  eventChange: (clickInfo: EventChangeArg) => {
+    handleFormUpdate(clickInfo.event)
+  },
+  //initialEvents: INITIAL_EVENTS, // alternatively, use the `events` setting to fetch from a feed
+  events: async () => {
+    const events = await handleFormGet()
+    return events as EventInput[]
   }
+})
+
+const currentEvents = ref<EventApi[]>([])
+
+function handleWeekendsToggle() {
+  calendarOptions.value.weekends = !calendarOptions.value.weekends // update a property
 }
 </script>
 
