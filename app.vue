@@ -51,7 +51,7 @@ import type { ez } from '@fullcalendar/core/internal-common'
 import { ref } from 'vue'
 
 async function handleFormGet(): Promise<EventInput[]>{
-  return await $fetch('/api/entries') 
+  return await $fetch<EventInput[]>('/api/entries') 
 }
 
 async function handleFormInsert(event: { id: string; title: string; start: string; end: string; allDay: boolean }) {
