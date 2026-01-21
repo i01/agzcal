@@ -12,6 +12,7 @@ documentation https://docs.github.com/en/pages.
 - [GitHub CI](#github-ci)
 - [Building locally](#building-locally)
 - [Did you fork this project?](#did-you-fork-this-project)
+- [Troubleshooting](#troubleshooting)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -42,6 +43,15 @@ Read more at Nuxt's [documentation](https://nuxt.com/docs/getting-started/introd
 If you forked this project for your own use, please go to your project's
 **Settings** and remove the forking relationship, which won't be necessary
 unless you want to contribute back to the upstream project.
+
+## Troubleshooting
+
+1. `EBADENGINE` warnings in combination with `gyp` errors: That probably means
+that your `node` version is too old. You can add your installed version to
+[`package.json`](package.json) as an additional dependency (e.g.
+`"node": "^18.19.1"` for Ubuntu 24.04) as well as an older version of @nuxt/cli
+(i.e. `"@nuxt/cli": "<3.29.0"`). However, this might not work in the future.
+You would have to upgrade `node` then.
 
 [ci]: https://docs.github.com/en/actions/get-started/continuous-integration
 [Nuxt]: https://nuxtjs.org/

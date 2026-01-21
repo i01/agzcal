@@ -1,43 +1,45 @@
 <template>
-  <div class='app'>
-    <div class='app-sidebar'>
-      <div class='app-sidebar-section'>
-        <h2>Instructions</h2>
-        <ul>
-          <li>Select dates and you will be prompted to create a new event</li>
-          <li>Drag, drop, and resize events</li>
-          <li>Click an event to delete it</li>
-        </ul>
+  <UApp>
+    <div class='app'>
+      <div class='app-sidebar'>
+        <div class='app-sidebar-section'>
+          <h2>Instructions</h2>
+          <ul>
+            <li>Select dates and you will be prompted to create a new event</li>
+            <li>Drag, drop, and resize events</li>
+            <li>Click an event to delete it</li>
+          </ul>
+        </div>
+        <div class='app-sidebar-section'>
+          <label>
+            <input
+              type='checkbox'
+              :checked='calendarOptions.weekends'
+              @change='handleWeekendsToggle'
+            />
+            toggle weekends
+          </label>
+        </div>
+        <div class='app-sidebar-section'>
+          <h2>All Events ({{ currentEvents.length }})</h2>
+          <ul>
+            <li v-for='event in currentEvents' :key='event.id'>
+              <b>{{ event.startStr }}</b>
+              <i>{{ event.title }}</i>
+            </li>
+          </ul>
+        </div>
       </div>
-      <div class='app-sidebar-section'>
-        <label>
-          <input
-            type='checkbox'
-            :checked='calendarOptions.weekends'
-            @change='handleWeekendsToggle'
-          />
-          toggle weekends
-        </label>
-      </div>
-      <div class='app-sidebar-section'>
-        <h2>All Events ({{ currentEvents.length }})</h2>
-        <ul>
-          <li v-for='event in currentEvents' :key='event.id'>
-            <b>{{ event.startStr }}</b>
-            <i>{{ event.title }}</i>
-          </li>
-        </ul>
+      <div class='app-main'>
+        <FullCalendar class='app-calendar' :options='calendarOptions'>
+          <template v-slot:eventContent='arg'>
+            <b>{{ arg.timeText }}</b>
+            <i>{{ arg.event.title }}</i>
+          </template>
+        </FullCalendar>
       </div>
     </div>
-    <div class='app-main'>
-      <FullCalendar class='app-calendar' :options='calendarOptions'>
-        <template v-slot:eventContent='arg'>
-          <b>{{ arg.timeText }}</b>
-          <i>{{ arg.event.title }}</i>
-        </template>
-      </FullCalendar>
-    </div>
-  </div>
+  </UApp>
 </template>
 
 <script setup lang="ts">
@@ -51,7 +53,7 @@ import type { ez } from '@fullcalendar/core/internal-common'
 import { ref } from 'vue'
 
 async function handleFormGet(): Promise<EventInput[]>{
-  return await $fetch<EventInput[]>('/api/entries') 
+  return await $fetch<EventInput[]>('/api/entries')
 }
 
 async function handleFormInsert(event: { id: string; title: string; start: string; end: string; allDay: boolean }) {
@@ -91,9 +93,9 @@ const calendarOptions = ref<CalendarOptions>({
   select: (selectInfo: DateSelectArg) => {
     let title = prompt('Please enter a new title for your event')
     let calendarApi = selectInfo.view.calendar
-    
+
     calendarApi.unselect() // clear date selection
-    
+
     if (title) {
       let entry = {
         id: createEventId(),
