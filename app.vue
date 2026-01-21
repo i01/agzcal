@@ -104,7 +104,7 @@ const calendarOptions = ref<CalendarOptions>({
       allDay: selectInfo.allDay
     })
 
-    let {title, _} = await instance.result
+    let {title, start, end} = await instance.result
     let calendarApi = selectInfo.view.calendar
 
     calendarApi.unselect() // clear date selection
@@ -113,8 +113,8 @@ const calendarOptions = ref<CalendarOptions>({
       let entry = {
         id: createEventId(),
         title,
-        start: selectInfo.startStr,
-        end: selectInfo.endStr,
+        start,
+        end,
         allDay: selectInfo.allDay
       }
       calendarApi.addEvent(entry)
@@ -145,7 +145,7 @@ const calendarOptions = ref<CalendarOptions>({
       allDay: clickInfo.event.allDay
     })
 
-    let {title, toDelete} = await instance.result
+    let {title, start, end, toDelete} = await instance.result
 
     if (toDelete) {
       clickInfo.event.remove()
@@ -163,6 +163,7 @@ const calendarOptions = ref<CalendarOptions>({
 
     if (title) {
       clickInfo.event.setProp('title', title)
+      clickInfo.event.setDates(start, end)
 
       toast.add({
         title: `Success`,
