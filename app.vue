@@ -51,6 +51,7 @@ import { INITIAL_EVENTS, createEventId } from './event-utils'
 import type { CalendarOptions, DateSelectArg, EventApi, EventChangeArg, EventClickArg, EventInput } from '@fullcalendar/core/index.js'
 import type { ez } from '@fullcalendar/core/internal-common'
 import { ref } from 'vue'
+import { LazyModalEvent } from '#components'
 
 async function handleFormGet(): Promise<EventInput[]>{
   return await $fetch<EventInput[]>('/api/entries')
@@ -76,6 +77,11 @@ async function handleFormDelete(event: ez){
   })
 }
 
+const toast = useToast()
+const overlay = useOverlay()
+
+const modal = overlay.create(LazyModalEvent)
+
 const calendarOptions = ref<CalendarOptions>({
   plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin],
   headerToolbar: {
@@ -90,8 +96,15 @@ const calendarOptions = ref<CalendarOptions>({
   selectMirror: true,
   dayMaxEvents: true,
   weekends: true,
-  select: (selectInfo: DateSelectArg) => {
-    let title = prompt('Please enter a new title for your event')
+  select: async (selectInfo: DateSelectArg) => {
+    const instance = modal.open({
+      title: ref('').value,
+      start: selectInfo.startStr,
+      end: selectInfo.endStr,
+      allDay: selectInfo.allDay
+    })
+
+    let {title, _} = await instance.result
     let calendarApi = selectInfo.view.calendar
 
     calendarApi.unselect() // clear date selection
@@ -105,14 +118,68 @@ const calendarOptions = ref<CalendarOptions>({
         allDay: selectInfo.allDay
       }
       calendarApi.addEvent(entry)
+
+      toast.add({
+        title: `Success`,
+        description: `'${title}' has been added.`,
+        color: 'success',
+        close: false,
+        id: 'modal-success'
+      })
       handleFormInsert(entry)
+      return
     }
+
+    toast.add({
+      title: `Canceled`,
+      color: 'error',
+      close: false,
+      id: 'modal-dismiss'
+    })
   },
-  eventClick: (clickInfo: EventClickArg) => {
-    if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'?`)) {
+  eventClick: async (clickInfo: EventClickArg) => {
+    const instance = modal.open({
+      title: clickInfo.event.title,
+      start: clickInfo.event.startStr,
+      end: clickInfo.event.endStr,
+      allDay: clickInfo.event.allDay
+    })
+
+    let {title, toDelete} = await instance.result
+
+    if (toDelete) {
       clickInfo.event.remove()
+
+      toast.add({
+        title: `Success`,
+        description: `'${title}' has been deleted.`,
+        color: 'success',
+        close: false,
+        id: 'modal-success'
+      })
       handleFormDelete(clickInfo.event)
+      return
     }
+
+    if (title) {
+      clickInfo.event.setProp('title', title)
+
+      toast.add({
+        title: `Success`,
+        description: `'${title}' has been updated.`,
+        color: 'success',
+        close: false,
+        id: 'modal-success'
+      })
+      return
+    }
+
+    toast.add({
+      title: `Canceled`,
+      color: 'error',
+      close: false,
+      id: 'modal-dismiss'
+    })
   },
   eventsSet: (events: EventApi[]) => {
     currentEvents.value = events
