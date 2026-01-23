@@ -7,7 +7,7 @@
           <ul>
             <li>Select dates and you will be prompted to create a new event</li>
             <li>Drag, drop, and resize events</li>
-            <li>Click an event to delete it</li>
+            <li>Click an event to edit or delete it</li>
           </ul>
         </div>
         <div class='app-sidebar-section'>
