@@ -18,14 +18,16 @@
     "@fullcalendar/interaction": "^6.1.10",
     "@fullcalendar/timegrid": "^6.1.10",
     "@fullcalendar/vue3": "^6.1.10",
+    "@nuxt/ui": "^3.0.0",
     "@paralleldrive/cuid2": "^2.2.2",
+    "better-sqlite3": "^11.10.0",
+    "drizzle-orm": "^0.44.2",
     "nuxt": "^3.16.0",
     "vue": "latest",
-    "drizzle-orm": "^0.44.2",
-    "better-sqlite3": "^11.10.0",
     "zod": "^3.25.67"
   },
   "devDependencies": {
+    "@iconify-json/lucide": "^1.2.30",
     "@types/better-sqlite3": "^7.6.13",
     "drizzle-kit": "^0.31.1"
   } 

@@ -1,43 +1,45 @@
 <template>
-  <div class='app'>
-    <div class='app-sidebar'>
-      <div class='app-sidebar-section'>
-        <h2>Instructions</h2>
-        <ul>
-          <li>Select dates and you will be prompted to create a new event</li>
-          <li>Drag, drop, and resize events</li>
-          <li>Click an event to delete it</li>
-        </ul>
+  <UApp>
+    <div class='app'>
+      <div class='app-sidebar'>
+        <div class='app-sidebar-section'>
+          <h2>Instructions</h2>
+          <ul>
+            <li>Select dates and you will be prompted to create a new event</li>
+            <li>Drag, drop, and resize events</li>
+            <li>Click an event to edit or delete it</li>
+          </ul>
+        </div>
+        <div class='app-sidebar-section'>
+          <label>
+            <input
+              type='checkbox'
+              :checked='calendarOptions.weekends'
+              @change='handleWeekendsToggle'
+            />
+            toggle weekends
+          </label>
+        </div>
+        <div class='app-sidebar-section'>
+          <h2>All Events ({{ currentEvents.length }})</h2>
+          <ul>
+            <li v-for='event in currentEvents' :key='event.id'>
+              <b>{{ event.startStr }}</b>
+              <i>{{ event.title }}</i>
+            </li>
+          </ul>
+        </div>
       </div>
-      <div class='app-sidebar-section'>
-        <label>
-          <input
-            type='checkbox'
-            :checked='calendarOptions.weekends'
-            @change='handleWeekendsToggle'
-          />
-          toggle weekends
-        </label>
-      </div>
-      <div class='app-sidebar-section'>
-        <h2>All Events ({{ currentEvents.length }})</h2>
-        <ul>
-          <li v-for='event in currentEvents' :key='event.id'>
-            <b>{{ event.startStr }}</b>
-            <i>{{ event.title }}</i>
-          </li>
-        </ul>
+      <div class='app-main'>
+        <FullCalendar class='app-calendar' :options='calendarOptions'>
+          <template v-slot:eventContent='arg'>
+            <b>{{ arg.timeText }}</b>
+            <i>{{ arg.event.title }}</i>
+          </template>
+        </FullCalendar>
       </div>
     </div>
-    <div class='app-main'>
-      <FullCalendar class='app-calendar' :options='calendarOptions'>
-        <template v-slot:eventContent='arg'>
-          <b>{{ arg.timeText }}</b>
-          <i>{{ arg.event.title }}</i>
-        </template>
-      </FullCalendar>
-    </div>
-  </div>
+  </UApp>
 </template>
 
 <script setup lang="ts">
@@ -49,9 +51,10 @@ import { INITIAL_EVENTS, createEventId } from './event-utils'
 import type { CalendarOptions, DateSelectArg, EventApi, EventChangeArg, EventClickArg, EventInput } from '@fullcalendar/core/index.js'
 import type { ez } from '@fullcalendar/core/internal-common'
 import { ref } from 'vue'
+import { LazyModalEvent } from '#components'
 
 async function handleFormGet(): Promise<EventInput[]>{
-  return await $fetch<EventInput[]>('/api/entries') 
+  return await $fetch<EventInput[]>('/api/entries')
 }
 
 async function handleFormInsert(event: { id: string; title: string; start: string; end: string; allDay: boolean }) {
@@ -74,6 +77,11 @@ async function handleFormDelete(event: ez){
   })
 }
 
+const toast = useToast()
+const overlay = useOverlay()
+
+const modal = overlay.create(LazyModalEvent)
+
 const calendarOptions = ref<CalendarOptions>({
   plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin],
   headerToolbar: {
@@ -88,29 +96,91 @@ const calendarOptions = ref<CalendarOptions>({
   selectMirror: true,
   dayMaxEvents: true,
   weekends: true,
-  select: (selectInfo: DateSelectArg) => {
-    let title = prompt('Please enter a new title for your event')
+  select: async (selectInfo: DateSelectArg) => {
+    const instance = modal.open({
+      title: ref('').value,
+      start: selectInfo.startStr,
+      end: selectInfo.endStr,
+      allDay: selectInfo.allDay
+    })
+
+    let {title, start, end} = await instance.result
     let calendarApi = selectInfo.view.calendar
-    
+
     calendarApi.unselect() // clear date selection
-    
+
     if (title) {
       let entry = {
         id: createEventId(),
         title,
-        start: selectInfo.startStr,
-        end: selectInfo.endStr,
+        start,
+        end,
         allDay: selectInfo.allDay
       }
       calendarApi.addEvent(entry)
+
+      toast.add({
+        title: `Success`,
+        description: `'${title}' has been added.`,
+        color: 'success',
+        close: false,
+        id: 'modal-success'
+      })
       handleFormInsert(entry)
+      return
     }
+
+    toast.add({
+      title: `Canceled`,
+      color: 'error',
+      close: false,
+      id: 'modal-dismiss'
+    })
   },
-  eventClick: (clickInfo: EventClickArg) => {
-    if (confirm(`Are you sure you want to delete the event '${clickInfo.event.title}'?`)) {
+  eventClick: async (clickInfo: EventClickArg) => {
+    const instance = modal.open({
+      title: clickInfo.event.title,
+      start: clickInfo.event.startStr,
+      end: clickInfo.event.endStr,
+      allDay: clickInfo.event.allDay
+    })
+
+    let {title, start, end, toDelete} = await instance.result
+
+    if (toDelete) {
       clickInfo.event.remove()
+
+      toast.add({
+        title: `Success`,
+        description: `'${title}' has been deleted.`,
+        color: 'success',
+        close: false,
+        id: 'modal-success'
+      })
       handleFormDelete(clickInfo.event)
+      return
     }
+
+    if (title) {
+      clickInfo.event.setProp('title', title)
+      clickInfo.event.setDates(start, end)
+
+      toast.add({
+        title: `Success`,
+        description: `'${title}' has been updated.`,
+        color: 'success',
+        close: false,
+        id: 'modal-success'
+      })
+      return
+    }
+
+    toast.add({
+      title: `Canceled`,
+      color: 'error',
+      close: false,
+      id: 'modal-dismiss'
+    })
   },
   eventsSet: (events: EventApi[]) => {
     currentEvents.value = events
