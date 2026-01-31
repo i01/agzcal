@@ -197,6 +197,9 @@ const calendarOptions = ref<CalendarOptions>({
   //initialEvents: INITIAL_EVENTS, // alternatively, use the `events` setting to fetch from a feed
   events: async () => {
     const events = await handleFormGet()
+    if (events.length == 0) {
+      return INITIAL_EVENTS as EventInput[]
+    }
     return events as EventInput[]
   }
 })
