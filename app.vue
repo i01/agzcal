@@ -163,7 +163,8 @@ const calendarOptions = ref<CalendarOptions>({
 
     if (title) {
       clickInfo.event.setProp('title', title)
-      clickInfo.event.setDates(start, end)
+      clickInfo.event.setStart(start)
+      clickInfo.event.setEnd(end)
 
       toast.add({
         title: `Success`,
