@@ -77,6 +77,9 @@ async function handleFormDelete(event: ez){
   })
 }
 
+const res = await $fetch<EventInput[] | { error?: string }>('/api/entries').catch(() => null)
+const dbAvailable = Array.isArray(res)
+
 const toast = useToast()
 const overlay = useOverlay()
 
@@ -117,8 +120,13 @@ const calendarOptions = ref<CalendarOptions>({
         end,
         allDay: selectInfo.allDay
       }
-      calendarApi.addEvent(entry)
 
+      if (dbAvailable) {
+        await handleFormInsert(entry)
+        calendarApi.refetchEvents()
+      } else{
+        calendarApi.addEvent(entry)
+      }
       toast.add({
         title: `Success`,
         description: `'${title}' has been added.`,
@@ -126,7 +134,6 @@ const calendarOptions = ref<CalendarOptions>({
         close: false,
         id: 'modal-success'
       })
-      handleFormInsert(entry)
       return
     }
 
@@ -150,6 +157,9 @@ const calendarOptions = ref<CalendarOptions>({
     if (toDelete) {
       clickInfo.event.remove()
 
+      if (dbAvailable) {
+        handleFormDelete(clickInfo.event)
+      }
       toast.add({
         title: `Success`,
         description: `'${title}' has been deleted.`,
@@ -157,7 +167,6 @@ const calendarOptions = ref<CalendarOptions>({
         close: false,
         id: 'modal-success'
       })
-      handleFormDelete(clickInfo.event)
       return
     }
 
@@ -192,15 +201,19 @@ const calendarOptions = ref<CalendarOptions>({
   eventRemove:
   */
   eventChange: (clickInfo: EventChangeArg) => {
-    handleFormUpdate(clickInfo.event)
+    if (dbAvailable) {
+      handleFormUpdate(clickInfo.event)
+    }
   },
   //initialEvents: INITIAL_EVENTS, // alternatively, use the `events` setting to fetch from a feed
   events: async () => {
-    const events = await handleFormGet()
-    if (events.length == 0) {
-      return INITIAL_EVENTS as EventInput[]
+    if (dbAvailable) {
+      const events = await handleFormGet()
+      if (events.length > 0) {
+        return events as EventInput[]
+      }
     }
-    return events as EventInput[]
+    return INITIAL_EVENTS as EventInput[]
   }
 })
 
