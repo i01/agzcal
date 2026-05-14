@@ -99,6 +99,7 @@ const calendarOptions = ref<CalendarOptions>({
   selectMirror: true,
   dayMaxEvents: true,
   weekends: true,
+  forceEventDuration: true,
   select: async (selectInfo: DateSelectArg) => {
     const instance = modal.open({
       title: ref('').value,
