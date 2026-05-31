@@ -10,25 +10,22 @@
     "postinstall": "nuxt prepare",
     "clean": "rm -rf .nuxt .output",
     "db:generate": "drizzle-kit generate --schema ./server/database/schema.ts --dialect sqlite --out ./server/database/migrations",
-    "db:push": "drizzle-kit push --dialect sqlite --schema ./server/database/schema.ts --url ./local.db" 
+    "db:push": "drizzle-kit push --dialect sqlite --schema ./server/database/schema.ts --url ./local.db"
   },
   "dependencies": {
-    "@fullcalendar/core": "^6.1.10",
-    "@fullcalendar/daygrid": "^6.1.10",
-    "@fullcalendar/interaction": "^6.1.10",
-    "@fullcalendar/timegrid": "^6.1.10",
-    "@fullcalendar/vue3": "^6.1.10",
-    "@nuxt/ui": "^3.0.0",
-    "@paralleldrive/cuid2": "^2.2.2",
-    "better-sqlite3": "^11.10.0",
-    "drizzle-orm": "^0.44.2",
-    "nuxt": "^3.16.0",
-    "vue": "latest",
-    "zod": "^3.25.67"
+    "@fullcalendar/daygrid": "^6.1.20",
+    "@fullcalendar/interaction": "^6.1.20",
+    "@fullcalendar/timegrid": "^6.1.20",
+    "@fullcalendar/vue3": "^6.1.20",
+    "@nuxt/ui": "^4.6.1",
+    "@paralleldrive/cuid2": "^3.3.0",
+    "better-sqlite3": "^12.9.0",
+    "drizzle-orm": "^0.45.2",
+    "nuxt": "^4.4.2"
   },
   "devDependencies": {
-    "@iconify-json/lucide": "^1.2.30",
+    "@iconify-json/lucide": "^1.2.102",
     "@types/better-sqlite3": "^7.6.13",
-    "drizzle-kit": "^0.31.1"
-  } 
+    "drizzle-kit": "^0.31.10"
+  }
 }
