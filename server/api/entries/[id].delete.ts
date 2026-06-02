@@ -1,8 +1,8 @@
 export default eventHandler(async (event) => {
   const { id } = getRouterParams(event)
   
-  const deletedEntry = await useDrizzle().delete(tables.entries).where(and(
-    eq(tables.entries.id, id)
+  const deletedEntry = useDrizzle().delete(tables.entries).where(and(
+    eq(tables.entries.id, String(id))
   )).returning().get()
 
   if (!deletedEntry) {

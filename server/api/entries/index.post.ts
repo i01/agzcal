@@ -4,7 +4,7 @@ export default eventHandler(async (event) => {
   const { start } = await readBody(event)
   const { end } = await readBody(event)
 
-  const entry = await useDrizzle().insert(tables.entries).values({
+  const entry = useDrizzle().insert(tables.entries).values({
     id,
     title,
     start,

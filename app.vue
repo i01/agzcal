@@ -44,34 +44,34 @@
 
 <script setup lang="ts">
 import FullCalendar from '@fullcalendar/vue3'
-import interactionPlugin from '@fullcalendar/interaction'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
+import interactionPlugin from '@fullcalendar/interaction'
 import { INITIAL_EVENTS, createEventId } from './event-utils'
-import type { CalendarOptions, DateSelectArg, EventApi, EventChangeArg, EventClickArg, EventInput } from '@fullcalendar/core/index.js'
-import type { ez } from '@fullcalendar/core/internal-common'
+import type { CalendarOptions, DateSelectArg, EventApi, EventChangeArg, EventClickArg, EventInput } from '@fullcalendar/core'
 import { ref } from 'vue'
 import { LazyModalEvent } from '#components'
 
-async function handleFormGet(): Promise<EventInput[]>{
+async function handleFormGet(): Promise<EventInput[]> {
   return await $fetch<EventInput[]>('/api/entries')
 }
 
-async function handleFormInsert(event: { id: string; title: string; start: string; end: string; allDay: boolean }) {
+//async function handleFormInsert(event: { id: string; title: string; start: string; end: string; allDay: boolean }) {
+async function handleFormInsert(event: EventInput) {
   const res = await $fetch('/api/entries', {
     method: 'POST',
     body: event
   })
 }
 
-async function handleFormUpdate(event: ez) {
+async function handleFormUpdate(event: EventApi) {
   const res = await $fetch(`/api/entries/${event.id}`, {
     method: 'PATCH',
     body: event
   })
 }
 
-async function handleFormDelete(event: ez){
+async function handleFormDelete(event: EventApi) {
   const res = await $fetch(`/api/entries/${event.id}`, {
     method: 'DELETE'
   })
@@ -108,7 +108,7 @@ const calendarOptions = ref<CalendarOptions>({
       allDay: selectInfo.allDay
     })
 
-    let {title, start, end} = await instance.result
+    let { title, start, end } = await instance.result
     let calendarApi = selectInfo.view.calendar
 
     calendarApi.unselect() // clear date selection
@@ -125,7 +125,7 @@ const calendarOptions = ref<CalendarOptions>({
       if (dbAvailable) {
         await handleFormInsert(entry)
         calendarApi.refetchEvents()
-      } else{
+      } else {
         calendarApi.addEvent(entry)
       }
       toast.add({
@@ -153,7 +153,7 @@ const calendarOptions = ref<CalendarOptions>({
       allDay: clickInfo.event.allDay
     })
 
-    let {title, start, end, toDelete} = await instance.result
+    let { title, start, end, toDelete } = await instance.result
 
     if (toDelete) {
       clickInfo.event.remove()
