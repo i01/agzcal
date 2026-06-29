@@ -255,7 +255,7 @@ b { /* used for event dates/times */
 .app-sidebar {
   width: 300px;
   line-height: 1.5;
-  background: #eaf9ff;
+  background: light-dark(#eaf9ff, var(--fc-button-bg-color));
   border-right: 1px solid #d3e2e8;
 }
 
