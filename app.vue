@@ -44,11 +44,15 @@
 
 <script setup lang="ts">
 import FullCalendar from '@fullcalendar/vue3'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import timeGridPlugin from '@fullcalendar/timegrid'
-import interactionPlugin from '@fullcalendar/interaction'
+import dayGridPlugin from '@fullcalendar/vue3/daygrid'
+import timeGridPlugin from '@fullcalendar/vue3/timegrid'
+import interactionPlugin from '@fullcalendar/vue3/interaction'
+import classicThemePlugin from '@fullcalendar/vue3/themes/classic'
 import { INITIAL_EVENTS, createEventId } from './event-utils'
-import type { CalendarOptions, DateSelectArg, EventApi, EventChangeArg, EventClickArg, EventInput } from '@fullcalendar/core'
+import '@fullcalendar/vue3/skeleton.css';
+import '@fullcalendar/vue3/themes/classic/theme.css';
+import '@fullcalendar/vue3/themes/classic/palette.css';
+import type { CalendarOptions, DateSelectInfo, EventApi, EventChangeInfo, EventClickInfo, EventInput } from '@fullcalendar/vue3'
 import { ref } from 'vue'
 import { LazyModalEvent } from '#components'
 
@@ -56,7 +60,6 @@ async function handleFormGet(): Promise<EventInput[]> {
   return await $fetch<EventInput[]>('/api/entries')
 }
 
-//async function handleFormInsert(event: { id: string; title: string; start: string; end: string; allDay: boolean }) {
 async function handleFormInsert(event: EventInput) {
   const res = await $fetch('/api/entries', {
     method: 'POST',
@@ -86,7 +89,7 @@ const overlay = useOverlay()
 const modal = overlay.create(LazyModalEvent)
 
 const calendarOptions = ref<CalendarOptions>({
-  plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin],
+  plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, classicThemePlugin],
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
@@ -100,7 +103,7 @@ const calendarOptions = ref<CalendarOptions>({
   dayMaxEvents: true,
   weekends: true,
   forceEventDuration: true,
-  select: async (selectInfo: DateSelectArg) => {
+  select: async (selectInfo: DateSelectInfo) => {
     const instance = modal.open({
       title: ref('').value,
       start: selectInfo.startStr,
@@ -145,7 +148,7 @@ const calendarOptions = ref<CalendarOptions>({
       id: 'modal-dismiss'
     })
   },
-  eventClick: async (clickInfo: EventClickArg) => {
+  eventClick: async (clickInfo: EventClickInfo) => {
     const instance = modal.open({
       title: clickInfo.event.title,
       start: clickInfo.event.startStr,
@@ -201,7 +204,7 @@ const calendarOptions = ref<CalendarOptions>({
   eventChange:
   eventRemove:
   */
-  eventChange: (clickInfo: EventChangeArg) => {
+  eventChange: (clickInfo: EventChangeInfo) => {
     if (dbAvailable) {
       handleFormUpdate(clickInfo.event)
     }
@@ -225,7 +228,7 @@ function handleWeekendsToggle() {
 }
 </script>
 
-<style scoped>
+<style lang='css'>
 h2 {
   margin: 0;
   font-size: 16px;
@@ -255,7 +258,7 @@ b { /* used for event dates/times */
 .app-sidebar {
   width: 300px;
   line-height: 1.5;
-  background: light-dark(#eaf9ff, var(--fc-button-bg-color));
+  background: light-dark(#eaf9ff, var(--fc-classic-button));
   border-right: 1px solid #d3e2e8;
 }
 
@@ -268,7 +271,7 @@ b { /* used for event dates/times */
   padding: 3em;
 }
 
-.fc { /* the calendar root */
+.app-calendar {
   max-width: 1100px;
   margin: 0 auto;
 }

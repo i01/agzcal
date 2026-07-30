@@ -83,8 +83,8 @@ dist
 # Service worker
 sw.*
 
-# GitLab Pages
-public/
+# Outer monorepo
+.turbo
 
 .nitro
 .output
