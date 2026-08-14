@@ -88,7 +88,10 @@ const overlay = useOverlay()
 
 const modal = overlay.create(LazyModalEvent)
 
+const isDark = import.meta.client && window.matchMedia('(prefers-color-scheme: dark)').matches
+
 const calendarOptions = ref<CalendarOptions>({
+  colorScheme: isDark ? 'dark' : 'light',
   plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, classicThemePlugin],
   headerToolbar: {
     left: 'prev,next today',
@@ -228,7 +231,7 @@ function handleWeekendsToggle() {
 }
 </script>
 
-<style lang='css'>
+<style scoped>
 h2 {
   margin: 0;
   font-size: 16px;
@@ -270,7 +273,9 @@ b { /* used for event dates/times */
   flex-grow: 1;
   padding: 3em;
 }
+</style>
 
+<style>
 .app-calendar {
   max-width: 1100px;
   margin: 0 auto;
