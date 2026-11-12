@@ -10,10 +10,10 @@ export default defineNuxtConfig({
     optimizeDeps: {
       include: [
         '@fullcalendar/vue3',
-        '@fullcalendar/vue3/daygrid',
         '@fullcalendar/vue3/interaction',
-        '@fullcalendar/vue3/timegrid',
+        '@fullcalendar/vue3/list',
         '@fullcalendar/vue3/themes/classic',
+        '@fullcalendar/vue3/timegrid',
         '@paralleldrive/cuid2',
         '@vue/devtools-core',
         '@vue/devtools-kit',

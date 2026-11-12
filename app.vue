@@ -44,8 +44,8 @@
 
 <script setup lang="ts">
 import FullCalendar from '@fullcalendar/vue3'
-import dayGridPlugin from '@fullcalendar/vue3/daygrid'
 import timeGridPlugin from '@fullcalendar/vue3/timegrid'
+import listPlugin from '@fullcalendar/vue3/list'
 import interactionPlugin from '@fullcalendar/vue3/interaction'
 import classicThemePlugin from '@fullcalendar/vue3/themes/classic'
 import { INITIAL_EVENTS, createEventId } from './event-utils'
@@ -88,15 +88,15 @@ const overlay = useOverlay()
 
 const modal = overlay.create(LazyModalEvent)
 
-const isDark = import.meta.client && window.matchMedia('(prefers-color-scheme: dark)').matches
+const colorMode = useColorMode()
 
 const calendarOptions = ref<CalendarOptions>({
-  colorScheme: isDark ? 'dark' : 'light',
-  plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin, classicThemePlugin],
+  colorScheme: colorMode.value,
+  plugins: [interactionPlugin, timeGridPlugin, listPlugin, classicThemePlugin],
   headerToolbar: {
     left: 'prev,next today',
     center: 'title',
-    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+    right: 'dayGridMonth,timeGridWeek,listWeek'
   },
   initialView: 'timeGridWeek',
   nowIndicator: true,
